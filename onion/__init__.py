@@ -1,3 +1,1 @@
-"""
-Sample Package
-"""
+import log

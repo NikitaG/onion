@@ -2,8 +2,14 @@
 Sample Module
 """
 
-def sample_func(value):
+from onion.server import Broker
+
+def run_broker():
     """
-    Sample function
+    Running messaging broker
     """
-    return value+1
+    broker = Broker()
+    broker.start()
+
+if __name__ == "__main__":
+    run_broker()

@@ -2,6 +2,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "pythonPath": "${config:python.pythonPath}",
+            "envFile": "${workspaceRoot}/.venv",
+            "program": "${file}"
+        },
+        {
             "name": "PyTest",
             "type": "python",
             "request": "launch",
@@ -13,7 +21,7 @@
             ],
             "cwd": "${workspaceRoot}",
             "env": {},
-            "envFile": "${workspaceRoot}/.env",
+            "envFile": "${workspaceRoot}/.venv",
             "debugOptions": [
                 "WaitOnAbnormalExit",
                 "WaitOnNormalExit",
