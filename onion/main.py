@@ -12,4 +12,7 @@ def run_broker():
     broker.start()
 
 if __name__ == "__main__":
-    run_broker()
+    try:
+        run_broker()
+    except KeyboardInterrupt:
+        pass
