@@ -23,9 +23,8 @@ class WorkerQueue(object):
                 expired.append(address)
         for address in expired:
             self.queue.pop(address, None)
-            log.debug("Idle worker expired: %s, workers ready: %d", address, len(self.queue))
+            # log.debug("Idle worker expired: %s, workers ready: %d", address, len(self.queue))
             
-
     def next(self):
         address, _ = self.queue.popitem(False)
         return address

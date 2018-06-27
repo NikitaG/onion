@@ -85,7 +85,8 @@ class Broker(object):
 
         address = frames[0]
         if self.workers.ready(Worker(address)):
-            log.debug("New worker is connected: %s, workers ready: %d", address, len(self.workers))
+            pass
+            # log.debug("New worker is connected: %s, workers ready: %d", address, len(self.workers))
 
         # Validate control message, or return reply to client
         msg = frames[1:]
