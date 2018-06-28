@@ -1,7 +1,8 @@
 Onion - distributed tasks runner
 ================================
 
-This repo provides simple framework for running distributed task on Python.
+
+This repo provides simple framework for running distributed tasks on Python.
 
 ## Getting Started
 

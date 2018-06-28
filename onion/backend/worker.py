@@ -1,20 +1,21 @@
 # pylint: disable=E1101
 
-from time import time, sleep
 from random import randint
-
-from onion.exceptions import HeartbeatFailed
-from onion.backend import WorkerMessageHandler
+from time import sleep, time
+from typing import Callable
 
 import zmq
 
 from onion import constants, log
+from onion.backend import WorkerMessageHandler
+from onion.exceptions import HeartbeatFailed
 
 
 class Worker(object):
-    def __init__(self, broker_address: str = "tcp://localhost:5552", auto_recovery: bool = True):
+    def __init__(self, worker_func: Callable[..., bool], broker_address: str = "tcp://localhost:5552", auto_recovery: bool = True):
         self.running: bool = False
         self.auto_recovery: bool = auto_recovery
+        self.worker_func: Callable[..., bool] = worker_func
 
         self.broker_address: str = broker_address
         self.context: zmq.Context = zmq.Context(1)
@@ -23,7 +24,7 @@ class Worker(object):
     def run(self):
         interval = constants.INTERVAL_INIT
         while True:
-            self.run_handler()
+            self._run_handler()
             if not self.auto_recovery:
                 raise Exception
             else:
@@ -35,13 +36,14 @@ class Worker(object):
 
         return True
 
-    def run_handler(self):
+    def _run_handler(self):
         worker = self._create_worker()
 
         try:
-            handler = WorkerMessageHandler(worker)
+            handler = WorkerMessageHandler(self.worker_func, worker)
             while True:
-                socks = dict(self.poller.poll(constants.HEARTBEAT_INTERVAL * 1000))
+                socks = dict(self.poller.poll(
+                    constants.HEARTBEAT_INTERVAL * 1000))
                 handler.loop(socks)
         except HeartbeatFailed:
             self._kill_worker(worker)

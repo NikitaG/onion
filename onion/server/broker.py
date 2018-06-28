@@ -89,8 +89,8 @@ class Broker(object):
         if len(msg) == 1:
             if msg[0] not in (constants.RESPONSE_READY, constants.RESPONSE_HEARTBEAT):
                 log.error("Invalid message from worker: %s", msg)
-        else:
-            self.frontend.send_multipart(msg)
+        # else:
+        #     self.frontend.send_multipart(msg)
 
         # Send heartbeats to idle workers if it's time
         if time() >= self.heartbeat_at:
@@ -107,8 +107,8 @@ class Broker(object):
 
         self.msg_id += 1
         frames.insert(2, self.msg_id.to_bytes(4, byteorder=sys.byteorder))
-        # self.frontend.send_multipart(
-        #     frames[:3] + [constants.RESPONSE_DELIVERED])
+        self.frontend.send_multipart(
+            frames[:3] + [constants.RESPONSE_DELIVERED])
 
         frames.insert(0, self.workers.next())
         self.backend.send_multipart(frames)

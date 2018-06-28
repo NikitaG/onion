@@ -3,7 +3,7 @@ Sample Module
 """
 
 from onion.server import Broker
-from onion.backend import Worker
+from onion.backend import Worker, WorkerPool
 from onion.frontend import Client
 import sys
 import time
@@ -19,8 +19,22 @@ def run_worker():
     """
     Running messaging worker
     """
-    worker = Worker()
+    def work(*args):
+        time.sleep(0.1)
+        return True
+    worker = Worker(work)
     worker.run()
+    
+def run_workers(threads_number: int = 1):
+    """
+    Running messaging worker
+    """
+    def work(*args):
+        # print("MSG", *args)
+        # time.sleep(0)
+        return True
+    workerpool = WorkerPool(work, threads_number=threads_number)
+    workerpool.run()
 
 def run_client():
     """
@@ -41,9 +55,11 @@ if __name__ == "__main__":
     try:
         if len(sys.argv) == 1 or len(sys.argv) == 2 and sys.argv[1] == 'broker':
             run_broker()
-        if len(sys.argv) == 2 and sys.argv[1] == 'worker':
+        elif len(sys.argv) == 2 and sys.argv[1] == 'worker':
             run_worker()
-        if len(sys.argv) == 2 and sys.argv[1] == 'client':
+        elif len(sys.argv) == 3 and sys.argv[1] == 'workers':
+            run_workers(int(sys.argv[2]))
+        elif len(sys.argv) == 2 and sys.argv[1] == 'client':
             run_client()
     except KeyboardInterrupt:
         pass

@@ -1,6 +1,7 @@
 # pylint: disable=E1101
 
 from time import time
+from typing import Callable
 
 import zmq
 
@@ -9,8 +10,9 @@ from onion.exceptions import HeartbeatFailed, InvalidMessage
 
 
 class WorkerMessageHandler():
-    def __init__(self, worker_socket: zmq.Socket):
-        self.worker_socket = worker_socket
+    def __init__(self, worker_func: Callable[..., bool], worker_socket: zmq.Socket):
+        self.worker_socket: zmq.Socket = worker_socket
+        self.worker_func: Callable[..., bool] = worker_func
 
         self.heartbeat_at: float = time()
         self.liveness: int = constants.HEARTBEAT_LIVENESS
@@ -36,8 +38,12 @@ class WorkerMessageHandler():
         if not frames:
             raise InvalidMessage  # Interrupted
 
-        if len(frames) == 4:
-            self.worker_socket.send_multipart(frames[:3]+[constants.RESPONSE_OK])
+        if len(frames) >= 4:
+            if self.worker_func(*frames[3:]):
+                self.worker_socket.send_multipart(frames[:3]+[constants.RESPONSE_OK])
+            else:
+                self.worker_socket.send_multipart(frames[:3]+[constants.RESPONSE_FAILED])
+
             self.liveness = constants.HEARTBEAT_LIVENESS
             # time.sleep(1)  # Do some heavy work
         elif len(frames) == 1 and frames[0] == constants.RESPONSE_HEARTBEAT:
