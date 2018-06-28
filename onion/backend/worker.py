@@ -4,7 +4,7 @@ from time import time, sleep
 from random import randint
 
 from onion.exceptions import HeartbeatFailed
-from onion.client import WorkerMessageHandler
+from onion.backend import WorkerMessageHandler
 
 import zmq
 
@@ -21,10 +21,8 @@ class Worker(object):
         self.poller: zmq.Poller = zmq.Poller()
 
     def run(self):
-        self.running = True
-
         interval = constants.INTERVAL_INIT
-        while self.running:
+        while True:
             self.run_handler()
             if not self.auto_recovery:
                 raise Exception
@@ -42,7 +40,7 @@ class Worker(object):
 
         try:
             handler = WorkerMessageHandler(worker)
-            while self.running:
+            while True:
                 socks = dict(self.poller.poll(constants.HEARTBEAT_INTERVAL * 1000))
                 handler.loop(socks)
         except HeartbeatFailed:

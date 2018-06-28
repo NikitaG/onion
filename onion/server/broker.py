@@ -26,15 +26,11 @@ class Broker(object):
 
         log.debug("Messaging broker created")
 
-    def start(self):
+    def run(self):
         log.info("Starting messaging broker: frontend at %s, backend at %s", self.frontend_address, self.backend_address)
-        self.running = True
-
+        
         self._create_routers()
         self._start_routing()
-
-    def stop(self):
-        self.running = False
 
     def _create_routers(self):
         self.frontend = self.context.socket(zmq.ROUTER)  # ROUTER
@@ -53,7 +49,7 @@ class Broker(object):
 
         self.heartbeat_at = time() + constants.HEARTBEAT_INTERVAL
 
-        while self.running:
+        while True:
             if not self._message_loop(poll_workers, poll_both):
                 return
         log.info("Finishing message broker.")
@@ -111,8 +107,8 @@ class Broker(object):
 
         self.msg_id += 1
         frames.insert(2, self.msg_id.to_bytes(4, byteorder=sys.byteorder))
-        self.frontend.send_multipart(
-            frames[:3] + [constants.RESPONSE_DELIVERED])
+        # self.frontend.send_multipart(
+        #     frames[:3] + [constants.RESPONSE_DELIVERED])
 
         frames.insert(0, self.workers.next())
         self.backend.send_multipart(frames)
