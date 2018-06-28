@@ -1,18 +1,11 @@
-Python Project Boilerplate
-==========================
+Onion - distributed tasks runner
+================================
 
-This repo provides a standardized template for modern Python projects based
-on the layout [recommended by Kenneth Reitz](http://www.kennethreitz.org/essays/repository-structure-and-python).
-
-This version adds:
-* Support for installing development dependencies through setup.py
-* PyTest unit-test support
-* An [.editorconfig](http://editorconfig.org/) file
-* Sphinx documentation generation through setup.py
+This repo provides simple framework for running distributed task on Python.
 
 ## Getting Started
 
-The project is ready to run as is. You will need Python 2.7 or later.
+The project is ready to run as is. You will need Python 3.6 or later.
 
 ### Create a Virtual Environment
 
@@ -22,20 +15,18 @@ After cloning or downloading the repo, create a Python virtual environment with:
 python -m venv .venv
 ```
 
-if the `pyvenv` command does not exist on your system.
-
 ### Activate the Virtual Environment
 
 Now activate the virtual environment. on macOS, Linux and Unix systems, use:
 
 ```
-source .virtualenv/bin/activate
+. .venv/bin/activate
 ```
 
 On Windows:
 
 ```
-.virtualenv\Scripts\activate.bat
+.venv\Scripts\activate.bat
 ```
 
 ### Install the Development Environment
