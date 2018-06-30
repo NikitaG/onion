@@ -20,7 +20,8 @@ def run_worker():
     Running messaging worker
     """
     def work(*args):
-        time.sleep(0.1)
+        #time.sleep(0.1)
+        print(*args)
         return True
     worker = Worker(work)
     worker.run()
@@ -30,8 +31,8 @@ def run_workers(threads_number: int = 1):
     Running messaging worker
     """
     def work(*args):
-        # print("MSG", *args)
-        # time.sleep(0)
+        print("MSG", *args)
+        time.sleep(0.1)
         return True
     workerpool = WorkerPool(work, threads_number=threads_number)
     workerpool.run()
@@ -49,6 +50,7 @@ def run_client():
         i += 1
         client.send("Test %d" % i)
     print(i)
+    client.disconnect()
 
 
 if __name__ == "__main__":

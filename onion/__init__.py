@@ -1,3 +1,3 @@
-import log
+from . import log
 
-import exceptions
+from . import exceptions

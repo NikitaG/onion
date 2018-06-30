@@ -14,7 +14,9 @@ VERSION = '0.1'
 AUTHOR = 'Nikita Golovkin'
 REQUIRED_PYTHON_VERSION = (3, 6)
 PACKAGES = ['onion']
-INSTALL_DEPENDENCIES = []
+INSTALL_DEPENDENCIES = [
+    'Click>=6.0'
+]
 SETUP_DEPENDENCIES = [
 ]
 TEST_DEPENDENCIES = [
@@ -24,6 +26,7 @@ EXTRA_DEPENDENCIES = {
     'dev': [
         'pytest',
         'pylint',
+        'sphinx',
         'zmq'
     ]
 }
@@ -92,5 +95,11 @@ setup(
     cmdclass={
         'test': PyTest,
         'doc': BuildDocs
+    },
+    entry_points={
+        'console_scripts': [
+            'pusher=onion.cli:pusher',
+            'broker=onion.cli:broker',
+        ],
     }
 )

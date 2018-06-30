@@ -49,6 +49,9 @@ class Client(object):
             log.info("Client terminated.")
 
     def send(self, message):
+        if not self.client:
+            raise Exception("Client isn't connected.")
+            
         request = message.encode()
         log.debug("Sending (%s)", request)
         self.client.send(request)
