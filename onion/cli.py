@@ -11,9 +11,13 @@ import click
 @click.option('--compress', default="none", help='Whether input file compressed. Available options: none, bzip2, gzip')
 def pusher(file, frontend_address, mode, compress):
     """Console script for pusher."""
-    from onion.frontend import Pusher, PusherMode, PusherCompress
-    pusher = Pusher(frontend_address, PusherMode(mode))
-    pusher.push(file, PusherCompress(compress))
+    try:
+        from onion.frontend import Pusher, PusherMode, PusherCompress
+        pusher = Pusher(frontend_address, PusherMode(mode))
+        pusher.push(file, PusherCompress(compress))
+    except Exception as exc:
+        click.echo("Error:", exc)
+
     return 0
 
 

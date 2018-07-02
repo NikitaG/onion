@@ -30,7 +30,13 @@ class Pusher():
         
         file = self.open(filepath, compress)
         
+        i = 0
+        s = time()
+        batch = ""
         for line in file:
+            i += 1
+            if i % 1000 == 0:
+                print("Sent %d messages, speed %d msg/s." % (i, i / (time() - s)))
             push_function(line)
 
         self.client.disconnect()
@@ -39,15 +45,16 @@ class Pusher():
         if file == "-":
             file = sys.stdin.buffer
 
+
         if compress == PusherCompress.GZip:
             import gzip
             return gzip.open(file, 'rt', encoding=encoding)
         elif compress == PusherCompress.BZip2:
             import bz2
             return bz2.open(file, 'rt', encoding=encoding)
-        else:
-            if file == sys.stdin:
-                return file
+        else:   
+            if file == sys.stdin.buffer:
+                return file  
             return open(file, 'rt', encoding=encoding)
 
     def _push_json(self, line: str):

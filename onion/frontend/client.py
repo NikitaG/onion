@@ -28,7 +28,7 @@ class Client(object):
         log.info(str(identity))
     
         self.client.setsockopt(zmq.IDENTITY, identity)
-    
+        
         self.client.connect(self.server_address)
         self.poll.register(self.client, zmq.POLLIN)
 
@@ -51,11 +51,16 @@ class Client(object):
     def send(self, message):
         if not self.client:
             raise Exception("Client isn't connected.")
-            
-        request = message.encode()
-        log.debug("Sending (%s)", request)
-        self.client.send(request)
 
+        if type(message) == str:
+            request = message.encode()
+        elif type(message) == bytes:
+            request = message
+        else:
+            request = bytes(message)
+        # log.debug("Sending (%s)", request)
+        self.client.send(request)
+        
         retries_left = constants.REQUEST_RETRIES
         while retries_left:
             socks = dict(self.poll.poll(constants.REQUEST_TIMEOUT))
@@ -66,10 +71,10 @@ class Client(object):
                 if not reply:
                     return False
                 if reply == constants.RESPONSE_DELIVERED:
-                    log.debug("Server delivered (%s)", msg_id)
+                    # log.debug("Server delivered (%s)", msg_id)
                     return True
                 if reply == constants.RESPONSE_OK:
-                    log.debug("Server replied OK (%s)", msg_id)
+                    # log.debug("Server replied OK (%s)", msg_id)
                     return True
                 else:
                     log.error("Malformed reply from server: %s" , reply)
