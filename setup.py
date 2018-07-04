@@ -15,7 +15,8 @@ AUTHOR = 'Nikita Golovkin'
 REQUIRED_PYTHON_VERSION = (3, 6)
 PACKAGES = ['onion']
 INSTALL_DEPENDENCIES = [
-    'Click>=6.0'
+    'Click>=6.0',
+    'zmq'
 ]
 SETUP_DEPENDENCIES = [
 ]

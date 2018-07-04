@@ -8,6 +8,15 @@
             "pythonPath": "${config:python.pythonPath}",
             "envFile": "${workspaceRoot}/.venv",
             "program": "${file}"
+            
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "pythonPath": "${config:python.pythonPath}",
+            "envFile": "${workspaceRoot}/.venv",
+            "program": "${file}"
         },
         {
             "name": "PyTest",

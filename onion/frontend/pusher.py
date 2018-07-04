@@ -1,9 +1,11 @@
 import fileinput
 import sys
+import traceback
 from time import time
 from enum import Enum
 
 from onion.frontend import Client
+from onion import log
 
 
 class PusherMode(Enum):
@@ -30,20 +32,25 @@ class Pusher():
         
         file = self.open(filepath, compress)
         
-        i = 0
+        total = 0
         s = time()
+        c = 0 
+
         batch = ""
         for line in file:
-            i += 1
-            if i % 1000 == 0:
-                print("Sent %d messages, speed %d msg/s." % (i, i / (time() - s)))
+            total += 1
+            c += 1
+            if total % 1000 == 0:
+                log.debug("Sent %d messages, speed %d msg/s." % (total, c / (time() - s)))
+                c = 0
+                s = time()
             push_function(line)
 
         self.client.disconnect()
     
     def open(self, file, compress, encoding='utf-8'):
         if file == "-":
-            file = sys.stdin.buffer
+            file = sys.stdin
 
 
         if compress == PusherCompress.GZip:
@@ -53,7 +60,7 @@ class Pusher():
             import bz2
             return bz2.open(file, 'rt', encoding=encoding)
         else:   
-            if file == sys.stdin.buffer:
+            if file == sys.stdin:
                 return file  
             return open(file, 'rt', encoding=encoding)
 

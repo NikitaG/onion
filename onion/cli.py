@@ -16,7 +16,7 @@ def pusher(file, frontend_address, mode, compress):
         pusher = Pusher(frontend_address, PusherMode(mode))
         pusher.push(file, PusherCompress(compress))
     except Exception as exc:
-        click.echo("Error:", exc)
+        click.echo(exc, err=True)
 
     return 0
 
