@@ -14,7 +14,7 @@ class Client(object):
         self.context = zmq.Context(1)
         
         self.client = None
-        self.poll = zmq.Poller()
+        # self.poll = zmq.Poller()
 
     def connect(self):
         if self.client:
@@ -23,14 +23,14 @@ class Client(object):
 
         log.info("Connecting to server…")
         
-        self.client = self.context.socket(zmq.REQ)
+        self.client = self.context.socket(zmq.PUSH)
         identity = b"%04X-%04X" % (randint(0, 0x10000), randint(0, 0x10000))
         log.info(str(identity))
     
-        self.client.setsockopt(zmq.IDENTITY, identity)
+        # self.client.setsockopt(zmq.IDENTITY, identity)
         
-        self.client.connect(self.server_address)
-        self.poll.register(self.client, zmq.POLLIN)
+        self.client.bind(self.server_address)
+        # self.poll.register(self.client, zmq.POLLIN)
 
     def disconnect(self, terminate=False):
         if not self.context:
@@ -40,7 +40,7 @@ class Client(object):
             log.info("Disconnecting from server…")
             self.client.setsockopt(zmq.LINGER, 0)
             self.client.close()
-            self.poll.unregister(self.client)
+            # self.poll.unregister(self.client)
             self.client = None
 
         if terminate:
@@ -53,43 +53,7 @@ class Client(object):
             raise Exception("Client isn't connected.")
 
         if type(message) == str:
-            request = message.encode()
-        elif type(message) == bytes:
-            request = message
+            self.client.send_string(message)
         else:
-            request = bytes(message)
-        # log.debug("Sending (%s)", request)
-        self.client.send(request)
+            self.client.send(message)
         
-        retries_left = constants.REQUEST_RETRIES
-        while retries_left:
-            socks = dict(self.poll.poll(constants.REQUEST_TIMEOUT))
-            if socks.get(self.client) == zmq.POLLIN:
-                frames = self.client.recv_multipart()
-                reply = frames[1]
-                msg_id = int.from_bytes(frames[0], byteorder=sys.byteorder)
-                if not reply:
-                    return False
-                if reply == constants.RESPONSE_DELIVERED:
-                    # log.debug("Server delivered (%s)", msg_id)
-                    return True
-                if reply == constants.RESPONSE_OK:
-                    # log.debug("Server replied OK (%s)", msg_id)
-                    return True
-                else:
-                    log.error("Malformed reply from server: %s" , reply)
-                    return False
-
-            else:
-                retries_left -= 1
-                if retries_left == 0 or not self.auto_recovery:
-                    raise Exception("Unable to send message to server: No response from server.")
-                
-                log.warning("No response from server, retrying…")
-                # Socket is confused. Close and remove it.
-                log.debug("Reconnecting and resending (%s)", request)
-                
-                self.disconnect()
-                self.connect()
-                self.client.send(request)
-

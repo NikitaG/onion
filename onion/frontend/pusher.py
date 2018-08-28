@@ -36,15 +36,22 @@ class Pusher():
         s = time()
         c = 0 
 
-        batch = ""
+        batch = []
+
         for line in file:
             total += 1
             c += 1
+            batch.append(line)
+
             if total % 1000 == 0:
+                push_function(",".join(batch))
+                batch.clear()
+            
+            if total % 10000 == 0:
                 log.debug("Sent %d messages, speed %d msg/s." % (total, c / (time() - s)))
                 c = 0
                 s = time()
-            push_function(line)
+            
 
         self.client.disconnect()
     

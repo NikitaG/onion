@@ -4,7 +4,7 @@ from onion.backend import Worker
 
 
 class WorkerPool():
-    def __init__(self, worker_func: Callable[..., bool], broker_address: str = "tcp://localhost:5552", auto_recovery: bool = True, threads_number: int = 1):
+    def __init__(self, worker_func: Callable[..., bool], broker_address: str = "tcp://localhost:5551", auto_recovery: bool = True, threads_number: int = 1):
         self.worker_func: Callable[..., bool] = worker_func
         self.threads_number: int = threads_number
         self.broker_address: str = broker_address

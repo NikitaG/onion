@@ -12,14 +12,14 @@ from onion.exceptions import HeartbeatFailed
 
 
 class Worker(object):
-    def __init__(self, worker_func: Callable[..., bool], broker_address: str = "tcp://localhost:5552", auto_recovery: bool = True):
+    def __init__(self, worker_func: Callable[..., bool], broker_address: str = "tcp://localhost:5551", auto_recovery: bool = True):
         self.running: bool = False
         self.auto_recovery: bool = auto_recovery
         self.worker_func: Callable[..., bool] = worker_func
 
         self.broker_address: str = broker_address
         self.context: zmq.Context = zmq.Context(1)
-        self.poller: zmq.Poller = zmq.Poller()
+        # self.poller: zmq.Poller = zmq.Poller()
 
     def run(self):
         interval = constants.INTERVAL_INIT
@@ -42,9 +42,7 @@ class Worker(object):
         try:
             handler = WorkerMessageHandler(self.worker_func, worker)
             while True:
-                socks = dict(self.poller.poll(
-                    constants.HEARTBEAT_INTERVAL * 1000))
-                handler.loop(socks)
+                handler.loop() 
         except HeartbeatFailed:
             self._kill_worker(worker)
 
@@ -53,17 +51,17 @@ class Worker(object):
 
         identity = b"%04X-%04X" % (randint(0, 0x10000), randint(0, 0x10000))
 
-        worker = self.context.socket(zmq.DEALER)  # DEALER
-        worker.setsockopt(zmq.IDENTITY, identity)
-        self.poller.register(worker, zmq.POLLIN)
+        worker = self.context.socket(zmq.PULL)  # DEALER
+        # worker.setsockopt(zmq.IDENTITY, identity)
+        # self.poller.register(worker, zmq.POLLIN)
 
         worker.connect(self.broker_address)
-        worker.send(constants.RESPONSE_READY)
+        # worker.send(constants.RESPONSE_READY)
 
         log.debug("Worker created and bound, id: %s", str(identity))
         return worker
 
     def _kill_worker(self, worker):
-        self.poller.unregister(worker)
+        # self.poller.unregister(worker)
         worker.setsockopt(zmq.LINGER, 0)
         worker.close()

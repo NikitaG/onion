@@ -17,37 +17,9 @@ class WorkerMessageHandler():
         self.heartbeat_at: float = time()
         self.liveness: int = constants.HEARTBEAT_LIVENESS
 
-    def loop(self, socks):
-        # Handle worker activity on backend
-        if socks.get(self.worker_socket) == zmq.POLLIN:
-            self._process_message()
-        else:
-            self.liveness -= 1
-            if not self.liveness:
-                raise HeartbeatFailed()
-        if time() > self.heartbeat_at:
-            self.heartbeat_at = time() + constants.HEARTBEAT_INTERVAL
-            #   print("I: Worker heartbeat")
-            self.worker_socket.send(constants.RESPONSE_HEARTBEAT)
-
+    def loop(self):
+        self._process_message()
+        
     def _process_message(self):
-        #  Get message
-        #  - 3-part envelope + content -> request
-        #  - 1-part HEARTBEAT -> heartbeat
-        frames = self.worker_socket.recv_multipart()
-        if not frames:
-            raise InvalidMessage  # Interrupted
-
-        if len(frames) >= 4:
-            if self.worker_func(*frames[3:]):
-                self.worker_socket.send_multipart(frames[:3]+[constants.RESPONSE_OK])
-            else:
-                self.worker_socket.send_multipart(frames[:3]+[constants.RESPONSE_FAILED])
-
-            self.liveness = constants.HEARTBEAT_LIVENESS
-            # time.sleep(1)  # Do some heavy work
-        elif len(frames) == 1 and frames[0] == constants.RESPONSE_HEARTBEAT:
-            # print("I: Queue heartbeat")
-            self.liveness = constants.HEARTBEAT_LIVENESS
-        else:
-            log.error("Invalid message: %s", frames)
+        line = self.worker_socket.recv_string()
+        self.worker_func(line)
