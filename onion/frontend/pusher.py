@@ -1,7 +1,7 @@
 import fileinput
 import sys
 import traceback
-from time import time
+from time import time, sleep
 from enum import Enum
 
 from onion.frontend import Client
@@ -43,9 +43,10 @@ class Pusher():
             c += 1
             batch.append(line)
 
-            if total % 1000 == 0:
+            if total % 2 == 0:
                 push_function(",".join(batch))
                 batch.clear()
+                sleep(10)
             
             if total % 10000 == 0:
                 log.debug("Sent %d messages, speed %d msg/s." % (total, c / (time() - s)))
